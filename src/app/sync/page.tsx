@@ -4,11 +4,66 @@ import { useState } from "react"
 import { Navbar } from "@/components/layout/Navbar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Github, Globe, CheckCircle2, ChevronRight, Plus } from "lucide-react"
-import { MOCK_PROJECTS } from "@/lib/mock-data"
+import { Input } from "@/components/ui/input"
+import { 
+  Github, 
+  Globe, 
+  CheckCircle2, 
+  ChevronRight, 
+  Plus, 
+  Loader2, 
+  AlertCircle,
+  Key
+} from "lucide-react"
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger,
+  DialogFooter
+} from "@/components/ui/dialog"
+import { useToast } from "@/hooks/use-toast"
+import { fetchGitHubRepos } from "@/app/actions/github-actions"
+import { Project } from "@/lib/mock-data"
 
 export default function SyncPage() {
-  const [syncedProjects, setSyncedProjects] = useState(MOCK_PROJECTS)
+  const [syncedProjects, setSyncedProjects] = useState<Project[]>([])
+  const [token, setToken] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
+  const { toast } = useToast()
+
+  const handleConnectGitHub = async () => {
+    if (!token) {
+      toast({
+        title: "Token required",
+        description: "Please enter a GitHub Personal Access Token.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      const repos = await fetchGitHubRepos(token)
+      setSyncedProjects(repos)
+      setIsOpen(false)
+      toast({
+        title: "GitHub Connected",
+        description: `Successfully imported ${repos.length} repositories.`
+      })
+    } catch (error: any) {
+      toast({
+        title: "Connection Failed",
+        description: error.message,
+        variant: "destructive"
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <div className="min-h-screen pt-24 pb-20 px-4">
@@ -20,29 +75,70 @@ export default function SyncPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="bg-card border-border hover:border-primary/50 transition-colors cursor-pointer group">
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div className="p-3 bg-secondary rounded-xl">
-                  <Github className="w-8 h-8 text-[#fff]" />
+          <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+              <Card className="bg-card border-border hover:border-primary/50 transition-colors cursor-pointer group">
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div className="p-3 bg-secondary rounded-xl">
+                      <Github className="w-8 h-8 text-[#fff]" />
+                    </div>
+                    <Button size="sm" variant="outline" className="rounded-full">Connect</Button>
+                  </div>
+                  <CardTitle className="pt-4">GitHub</CardTitle>
+                  <CardDescription>Import from public or private repositories using a PAT.</CardDescription>
+                </CardHeader>
+              </Card>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Connect GitHub Account</DialogTitle>
+                <DialogDescription>
+                  Enter a Personal Access Token (classic) with <code className="text-primary">repo</code> scope.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex items-center space-x-2 py-4">
+                <div className="grid flex-1 gap-2">
+                  <div className="relative">
+                    <Key className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="token"
+                      type="password"
+                      placeholder="ghp_xxxxxxxxxxxx"
+                      className="pl-10"
+                      value={token}
+                      onChange={(e) => setToken(e.target.value)}
+                    />
+                  </div>
                 </div>
-                <Button size="sm" variant="outline" className="rounded-full">Connect</Button>
               </div>
-              <CardTitle className="pt-4">GitHub</CardTitle>
-              <CardDescription>Import from public or private repositories.</CardDescription>
-            </CardHeader>
-          </Card>
+              <div className="bg-muted/50 p-3 rounded-lg flex gap-3 text-xs text-muted-foreground mb-4">
+                <AlertCircle className="w-4 h-4 shrink-0 text-primary" />
+                <p>We only use this token to read repository metadata. It is not stored on our servers in this prototype.</p>
+              </div>
+              <DialogFooter>
+                <Button 
+                  type="submit" 
+                  className="w-full rounded-full" 
+                  onClick={handleConnectGitHub}
+                  disabled={isLoading}
+                >
+                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Verify & Connect"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
-          <Card className="bg-card border-border hover:border-primary/50 transition-colors cursor-pointer group">
+          <Card className="bg-card border-border opacity-50 cursor-not-allowed">
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div className="p-3 bg-secondary rounded-xl">
                   <Globe className="w-8 h-8 text-[#FC6D26]" />
                 </div>
-                <Button size="sm" variant="outline" className="rounded-full">Connect</Button>
+                <Button size="sm" variant="outline" className="rounded-full" disabled>Coming Soon</Button>
               </div>
               <CardTitle className="pt-4">GitLab</CardTitle>
-              <CardDescription>Support for GitLab.com and Self-Managed instances.</CardDescription>
+              <CardDescription>GitLab integration is currently under development.</CardDescription>
             </CardHeader>
           </Card>
         </div>
@@ -50,33 +146,41 @@ export default function SyncPage() {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-headline font-bold">Active Connections</h2>
-            <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Project
-            </Button>
+            {syncedProjects.length > 0 && (
+              <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Project
+              </Button>
+            )}
           </div>
           
           <div className="space-y-3">
-            {syncedProjects.map((project) => (
-              <div key={project.id} className="flex items-center justify-between p-4 rounded-xl border bg-card/50 hover:bg-card transition-colors group">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
-                    {project.provider === 'github' ? <Github className="w-5 h-5" /> : <Globe className="w-5 h-5" />}
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-foreground group-hover:text-primary transition-colors">{project.name}</h3>
-                    <p className="text-xs text-muted-foreground">Last synced: {new Date(project.lastSync).toLocaleDateString()}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-500/10 text-green-500 text-[10px] font-bold uppercase tracking-wider">
-                    <CheckCircle2 className="w-3 h-3" />
-                    Synced
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                </div>
+            {syncedProjects.length === 0 ? (
+              <div className="text-center py-12 border border-dashed rounded-2xl bg-card/20">
+                <p className="text-sm text-muted-foreground">No repositories connected yet.</p>
               </div>
-            ))}
+            ) : (
+              syncedProjects.map((project) => (
+                <div key={project.id} className="flex items-center justify-between p-4 rounded-xl border bg-card/50 hover:bg-card transition-colors group">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
+                      <Github className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-foreground group-hover:text-primary transition-colors">{project.name}</h3>
+                      <p className="text-xs text-muted-foreground">Last updated: {new Date(project.lastSync).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-500/10 text-green-500 text-[10px] font-bold uppercase tracking-wider">
+                      <CheckCircle2 className="w-3 h-3" />
+                      Active
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
