@@ -1,9 +1,15 @@
+
+"use client"
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Navbar } from "@/components/layout/Navbar"
 import { ArrowRight, GitBranch, History, Sparkles } from "lucide-react"
+import { signIn, useSession } from "next-auth/react"
 
 export default function LandingPage() {
+  const { data: session, status } = useSession()
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -25,12 +31,24 @@ export default function LandingPage() {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <Button size="lg" className="h-12 px-8 font-semibold rounded-full bg-primary hover:bg-primary/90" asChild>
-              <Link href="/sync">
-                Get Started
+            {status === "authenticated" ? (
+              <Button size="lg" className="h-12 px-8 font-semibold rounded-full bg-primary hover:bg-primary/90" asChild>
+                <Link href="/dashboard">
+                  Go to Dashboard
+                  <ArrowRight className="ml-2 w-4 h-4" />
+                </Link>
+              </Button>
+            ) : (
+              <Button 
+                size="lg" 
+                className="h-12 px-8 font-semibold rounded-full bg-primary hover:bg-primary/90"
+                onClick={() => signIn("github", { callbackUrl: "/dashboard" })}
+                disabled={status === "loading"}
+              >
+                {status === "loading" ? "Loading..." : "Get Started with GitHub"}
                 <ArrowRight className="ml-2 w-4 h-4" />
-              </Link>
-            </Button>
+              </Button>
+            )}
             <Button variant="outline" size="lg" className="h-12 px-8 font-semibold rounded-full border-muted-foreground/20" asChild>
               <Link href="/timeline">View Demo</Link>
             </Button>
@@ -40,7 +58,7 @@ export default function LandingPage() {
             <FeatureCard 
               icon={GitBranch} 
               title="Repo Sync" 
-              description="Connect your GitHub or GitLab repositories with a single click."
+              description="Connect your GitHub repositories with a single click."
             />
             <FeatureCard 
               icon={Sparkles} 
