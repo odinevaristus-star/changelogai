@@ -43,7 +43,7 @@ export default function LandingPage() {
             <FeatureCard 
               icon={GitBranch} 
               title="Repo Sync" 
-              description="Connect your GitHub repositories with a single click."
+              description="Connect your GitHub repositories using a Personal Access Token."
             />
             <FeatureCard 
               icon={Sparkles} 
