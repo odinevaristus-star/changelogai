@@ -1,6 +1,7 @@
+
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Navbar } from "@/components/layout/Navbar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -27,19 +28,43 @@ import {
 import { useToast } from "@/hooks/use-toast"
 import { fetchGitHubRepos } from "@/app/actions/github-actions"
 import { Project } from "@/lib/mock-data"
+import { useSession } from "next-auth/react"
+import Link from "next/link"
 
 export default function SyncPage() {
+  const { data: session }: any = useSession()
   const [syncedProjects, setSyncedProjects] = useState<Project[]>([])
   const [token, setToken] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [isSyncing, setIsSyncing] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const { toast } = useToast()
 
+  // Auto-sync if session has a token
+  useEffect(() => {
+    if (session?.accessToken && syncedProjects.length === 0 && !isSyncing) {
+      autoSync(session.accessToken)
+    }
+  }, [session, syncedProjects.length])
+
+  const autoSync = async (accessToken: string) => {
+    setIsSyncing(true)
+    try {
+      const repos = await fetchGitHubRepos(accessToken)
+      setSyncedProjects(repos)
+    } catch (error: any) {
+      console.error("Auto-sync failed", error)
+    } finally {
+      setIsSyncing(false)
+    }
+  }
+
   const handleConnectGitHub = async () => {
-    if (!token) {
+    const activeToken = token || session?.accessToken
+    if (!activeToken) {
       toast({
         title: "Token required",
-        description: "Please enter a GitHub Personal Access Token.",
+        description: "Please enter a GitHub Personal Access Token or sign in via GitHub.",
         variant: "destructive"
       })
       return
@@ -47,7 +72,7 @@ export default function SyncPage() {
 
     setIsLoading(true)
     try {
-      const repos = await fetchGitHubRepos(token)
+      const repos = await fetchGitHubRepos(activeToken)
       setSyncedProjects(repos)
       setIsOpen(false)
       toast({
@@ -114,7 +139,7 @@ export default function SyncPage() {
               </div>
               <div className="bg-muted/50 p-3 rounded-lg flex gap-3 text-xs text-muted-foreground mb-4">
                 <AlertCircle className="w-4 h-4 shrink-0 text-primary" />
-                <p>We only use this token to read repository metadata. It is not stored on our servers in this prototype.</p>
+                <p>We only use this token to read repository metadata. This session token is stored temporarily in your browser.</p>
               </div>
               <DialogFooter>
                 <Button 
@@ -147,21 +172,30 @@ export default function SyncPage() {
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-headline font-bold">Active Connections</h2>
             {syncedProjects.length > 0 && (
-              <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80">
+              <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80" onClick={handleConnectGitHub}>
                 <Plus className="w-4 h-4 mr-2" />
-                Add Project
+                Refresh Repos
               </Button>
             )}
           </div>
           
           <div className="space-y-3">
-            {syncedProjects.length === 0 ? (
+            {isSyncing ? (
+               <div className="text-center py-12 border border-dashed rounded-2xl bg-card/20">
+                <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-primary" />
+                <p className="text-sm text-muted-foreground">Syncing your GitHub repositories...</p>
+              </div>
+            ) : syncedProjects.length === 0 ? (
               <div className="text-center py-12 border border-dashed rounded-2xl bg-card/20">
                 <p className="text-sm text-muted-foreground">No repositories connected yet.</p>
               </div>
             ) : (
               syncedProjects.map((project) => (
-                <div key={project.id} className="flex items-center justify-between p-4 rounded-xl border bg-card/50 hover:bg-card transition-colors group">
+                <Link 
+                  href={`/repo/${project.name}`} 
+                  key={project.id} 
+                  className="flex items-center justify-between p-4 rounded-xl border bg-card/50 hover:bg-card transition-colors group cursor-pointer"
+                >
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
                       <Github className="w-5 h-5" />
@@ -178,7 +212,7 @@ export default function SyncPage() {
                     </div>
                     <ChevronRight className="w-4 h-4 text-muted-foreground" />
                   </div>
-                </div>
+                </Link>
               ))
             )}
           </div>

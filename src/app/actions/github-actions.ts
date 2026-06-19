@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -29,6 +30,35 @@ export async function fetchGitHubRepos(token: string) {
     }));
   } catch (error: any) {
     console.error('GitHub API Error:', error);
+    throw new Error(error.message || 'An unexpected error occurred');
+  }
+}
+
+export async function fetchGitHubCommits(token: string, owner: string, repo: string) {
+  try {
+    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/commits?per_page=20`, {
+      headers: {
+        Authorization: `token ${token}`,
+        Accept: 'application/vnd.github.v3+json',
+      },
+      next: { revalidate: 0 },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch commits');
+    }
+
+    const commits = await response.json();
+    return commits.map((item: any) => ({
+      id: item.sha.substring(0, 7),
+      message: item.commit.message,
+      author: item.commit.author.name,
+      date: item.commit.author.date,
+      url: item.html_url,
+    }));
+  } catch (error: any) {
+    console.error('GitHub Commits API Error:', error);
     throw new Error(error.message || 'An unexpected error occurred');
   }
 }
