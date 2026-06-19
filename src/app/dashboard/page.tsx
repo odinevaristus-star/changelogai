@@ -1,8 +1,6 @@
 
 "use client"
 
-import { useSession } from "next-auth/react"
-import { redirect } from "next/navigation"
 import { Navbar } from "@/components/layout/Navbar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -10,28 +8,13 @@ import { GitBranch, Plus, Zap, History, LayoutDashboard } from "lucide-react"
 import Link from "next/link"
 
 export default function DashboardPage() {
-  const { data: session, status } = useSession({
-    required: true,
-    onUnauthenticated() {
-      redirect("/")
-    },
-  })
-
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Zap className="w-8 h-8 text-primary animate-pulse" />
-      </div>
-    )
-  }
-
   return (
     <div className="min-h-screen pt-24 pb-20 px-4">
       <Navbar />
       <div className="max-w-5xl mx-auto space-y-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-headline font-bold">Welcome back, {session?.user?.name}</h1>
+            <h1 className="text-3xl font-headline font-bold">Dashboard</h1>
             <p className="text-muted-foreground">Manage your repositories and synthesize your latest changes.</p>
           </div>
           <Button className="rounded-full" asChild>

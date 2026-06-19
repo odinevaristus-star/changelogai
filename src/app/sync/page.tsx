@@ -27,44 +27,41 @@ import {
 } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { fetchGitHubRepos } from "@/app/actions/github-actions"
-import { Project } from "@/lib/mock-data"
-import { useSession } from "next-auth/react"
 import Link from "next/link"
 
 export default function SyncPage() {
-  const { data: session }: any = useSession()
-  const [syncedProjects, setSyncedProjects] = useState<Project[]>([])
+  const [syncedProjects, setSyncedProjects] = useState<any[]>([])
   const [token, setToken] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [isSyncing, setIsSyncing] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const { toast } = useToast()
 
-  // Auto-sync if session has a token
+  // Load token and repos from local storage on mount
   useEffect(() => {
-    if (session?.accessToken && syncedProjects.length === 0 && !isSyncing) {
-      autoSync(session.accessToken)
+    const savedToken = localStorage.getItem("github_pat")
+    if (savedToken) {
+      setToken(savedToken)
+      autoSync(savedToken)
     }
-  }, [session, syncedProjects.length])
+  }, [])
 
-  const autoSync = async (accessToken: string) => {
-    setIsSyncing(true)
+  const autoSync = async (activeToken: string) => {
+    setIsLoading(true)
     try {
-      const repos = await fetchGitHubRepos(accessToken)
+      const repos = await fetchGitHubRepos(activeToken)
       setSyncedProjects(repos)
     } catch (error: any) {
       console.error("Auto-sync failed", error)
     } finally {
-      setIsSyncing(false)
+      setIsLoading(false)
     }
   }
 
   const handleConnectGitHub = async () => {
-    const activeToken = token || session?.accessToken
-    if (!activeToken) {
+    if (!token) {
       toast({
         title: "Token required",
-        description: "Please enter a GitHub Personal Access Token or sign in via GitHub.",
+        description: "Please enter a GitHub Personal Access Token.",
         variant: "destructive"
       })
       return
@@ -72,8 +69,9 @@ export default function SyncPage() {
 
     setIsLoading(true)
     try {
-      const repos = await fetchGitHubRepos(activeToken)
+      const repos = await fetchGitHubRepos(token)
       setSyncedProjects(repos)
+      localStorage.setItem("github_pat", token)
       setIsOpen(false)
       toast({
         title: "GitHub Connected",
@@ -96,7 +94,7 @@ export default function SyncPage() {
       <div className="max-w-4xl mx-auto space-y-12">
         <div className="space-y-4">
           <h1 className="text-4xl font-headline font-bold">Synchronize Repositories</h1>
-          <p className="text-muted-foreground">Connect your development workflow to import history and project metadata.</p>
+          <p className="text-muted-foreground">Connect your development workflow using a Personal Access Token.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -111,7 +109,7 @@ export default function SyncPage() {
                     <Button size="sm" variant="outline" className="rounded-full">Connect</Button>
                   </div>
                   <CardTitle className="pt-4">GitHub</CardTitle>
-                  <CardDescription>Import from public or private repositories using a PAT.</CardDescription>
+                  <CardDescription>Import using a Personal Access Token (PAT).</CardDescription>
                 </CardHeader>
               </Card>
             </DialogTrigger>
@@ -139,7 +137,7 @@ export default function SyncPage() {
               </div>
               <div className="bg-muted/50 p-3 rounded-lg flex gap-3 text-xs text-muted-foreground mb-4">
                 <AlertCircle className="w-4 h-4 shrink-0 text-primary" />
-                <p>We only use this token to read repository metadata. This session token is stored temporarily in your browser.</p>
+                <p>Tokens are stored locally in your browser for the current session.</p>
               </div>
               <DialogFooter>
                 <Button 
@@ -180,7 +178,7 @@ export default function SyncPage() {
           </div>
           
           <div className="space-y-3">
-            {isSyncing ? (
+            {isLoading && syncedProjects.length === 0 ? (
                <div className="text-center py-12 border border-dashed rounded-2xl bg-card/20">
                 <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-primary" />
                 <p className="text-sm text-muted-foreground">Syncing your GitHub repositories...</p>

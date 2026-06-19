@@ -3,10 +3,9 @@
 
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
 import { Navbar } from "@/components/layout/Navbar"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { GitCommit, ArrowLeft, Loader2, Sparkles, ExternalLink } from "lucide-react"
 import { fetchGitHubCommits } from "@/app/actions/github-actions"
 import { useToast } from "@/hooks/use-toast"
@@ -15,7 +14,6 @@ import Link from "next/link"
 export default function RepoCommitsPage() {
   const params = useParams()
   const router = useRouter()
-  const { data: session }: any = useSession()
   const { toast } = useToast()
   
   const [commits, setCommits] = useState<any[]>([])
@@ -26,19 +24,20 @@ export default function RepoCommitsPage() {
   const repo = params.name as string
 
   useEffect(() => {
-    if (session?.accessToken) {
-      loadCommits()
-    } else if (session === null) {
-      setError("Authentication required to view commits.")
+    const token = localStorage.getItem("github_pat")
+    if (token) {
+      loadCommits(token)
+    } else {
+      setError("Personal Access Token required. Please connect your GitHub account.")
       setIsLoading(false)
     }
-  }, [session, owner, repo])
+  }, [owner, repo])
 
-  const loadCommits = async () => {
+  const loadCommits = async (token: string) => {
     setIsLoading(true)
     setError(null)
     try {
-      const data = await fetchGitHubCommits(session.accessToken, owner, repo)
+      const data = await fetchGitHubCommits(token, owner, repo)
       setCommits(data)
     } catch (err: any) {
       setError(err.message || "Failed to load commits.")
@@ -86,7 +85,7 @@ export default function RepoCommitsPage() {
           <Card className="border-destructive/20 bg-destructive/5">
             <CardContent className="py-12 text-center space-y-4">
               <p className="text-destructive font-medium">{error}</p>
-              <Button onClick={loadCommits} variant="outline" size="sm">Try Again</Button>
+              <Button onClick={() => router.push("/sync")} variant="outline" size="sm">Go to Sync</Button>
             </CardContent>
           </Card>
         ) : commits.length === 0 ? (
