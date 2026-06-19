@@ -1,4 +1,3 @@
-
 'use server';
 
 /**
@@ -9,8 +8,9 @@ export async function fetchGitHubRepos(token: string) {
   try {
     const response = await fetch('https://api.github.com/user/repos?sort=updated&per_page=10', {
       headers: {
-        Authorization: `token ${token}`,
+        Authorization: `Bearer ${token}`,
         Accept: 'application/vnd.github.v3+json',
+        'User-Agent': 'ChangelogAI-App',
       },
       next: { revalidate: 0 },
     });
@@ -38,8 +38,9 @@ export async function fetchGitHubCommits(token: string, owner: string, repo: str
   try {
     const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/commits?per_page=20`, {
       headers: {
-        Authorization: `token ${token}`,
+        Authorization: `Bearer ${token}`,
         Accept: 'application/vnd.github.v3+json',
+        'User-Agent': 'ChangelogAI-App',
       },
       next: { revalidate: 0 },
     });
