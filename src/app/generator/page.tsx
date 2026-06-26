@@ -4,10 +4,11 @@ import { useState } from "react"
 import { Navbar } from "@/components/layout/Navbar"
 import { Button } from "@/components/ui/button"
 import { MOCK_COMMITS } from "@/lib/mock-data"
-import { Sparkles, BrainCircuit, CheckCircle, ListChecks, ArrowRight, Loader2, Download } from "lucide-react"
+import { Sparkles, BrainCircuit, CheckCircle, ListChecks, ArrowRight, Loader2, Download, Terminal, Layers } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { categorizeChangelogEntry } from "@/ai/flows/categorize-changelog-entry-flow"
 import { generateFeatureSummary } from "@/ai/flows/generate-feature-summary-flow"
+import { cn } from "@/lib/utils"
 
 type Entry = {
   id: string
@@ -42,12 +43,10 @@ export default function GeneratorPage() {
 
     setIsProcessing(true)
     try {
-      // 1. Summarize
       const { summary } = await generateFeatureSummary({
         commitMessages: selectedEntries.map(e => e.message)
       })
 
-      // 2. Categorize the summary itself or pick a dominant category
       const { category } = await categorizeChangelogEntry({
         entry: summary
       })
@@ -79,107 +78,141 @@ export default function GeneratorPage() {
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-20 px-4">
+    <div className="min-h-screen pt-32 pb-20 px-4">
       <Navbar />
-      <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-7 space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-headline font-bold">Commit Feed</h1>
-              <p className="text-sm text-muted-foreground">Select clusters to synthesize into release notes.</p>
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setEntries(prev => prev.map(e => ({ ...e, selected: true })))}
-            >
-              <ListChecks className="w-4 h-4 mr-2" />
-              Select All
-            </Button>
-          </div>
-
-          <div className="space-y-3">
-            {entries.map((entry) => (
-              <div 
-                key={entry.id} 
-                onClick={() => toggleSelection(entry.id)}
-                className={`p-4 rounded-xl border transition-all cursor-pointer flex items-start gap-4 ${
-                  entry.selected ? 'bg-primary/5 border-primary ring-1 ring-primary/20' : 'bg-card/50 hover:bg-card border-border'
-                }`}
+      <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          {/* Feed Column */}
+          <div className="lg:col-span-7 space-y-8">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <h1 className="text-4xl font-headline font-bold">Commit Feed</h1>
+                <p className="text-muted-foreground">Select clusters to synthesize into release notes.</p>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="rounded-full bg-white/5 border-white/10 hover:bg-primary hover:text-primary-foreground transition-all"
+                onClick={() => setEntries(prev => prev.map(e => ({ ...e, selected: true })))}
               >
-                <div className={`mt-1 flex-shrink-0 w-5 h-5 rounded border flex items-center justify-center transition-colors ${
-                  entry.selected ? 'bg-primary border-primary' : 'bg-transparent border-border'
-                }`}>
-                  {entry.selected && <CheckCircle className="w-4 h-4 text-primary-foreground" />}
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-medium leading-relaxed">{entry.message}</p>
-                  <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">{entry.id}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+                <ListChecks className="w-4 h-4 mr-2" />
+                Select All
+              </Button>
+            </div>
 
-        <div className="lg:col-span-5 space-y-6">
-          <div className="sticky top-24 space-y-6">
-            <div className="p-6 rounded-2xl border bg-card/50 space-y-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                  <BrainCircuit className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <h2 className="font-headline font-bold text-xl">AI Processor</h2>
-                  <p className="text-xs text-muted-foreground">Ready to reason about clusters.</p>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="text-sm text-muted-foreground">
-                  Current Selection: <span className="text-foreground font-bold">{entries.filter(e => e.selected).length}</span> commits
-                </div>
-                
-                <Button 
-                  className="w-full h-12 bg-primary hover:bg-primary/90 rounded-full font-semibold"
-                  disabled={isProcessing}
-                  onClick={handleGenerate}
-                >
-                  {isProcessing ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <>
-                      Synthesize Changes
-                      <Sparkles className="ml-2 w-4 h-4" />
-                    </>
+            <div className="space-y-3">
+              {entries.map((entry) => (
+                <div 
+                  key={entry.id} 
+                  onClick={() => toggleSelection(entry.id)}
+                  className={cn(
+                    "p-6 rounded-2xl border transition-all duration-300 cursor-pointer flex items-start gap-6 group",
+                    entry.selected 
+                      ? "bg-primary/10 border-primary shadow-lg shadow-primary/5" 
+                      : "bg-white/[0.02] hover:bg-white/[0.04] border-white/5"
                   )}
-                </Button>
-              </div>
-
-              {finalOutput && (
-                <div className="pt-6 border-t space-y-4 animate-fade-in">
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Generated Result</h3>
-                  <div className="p-4 rounded-lg bg-secondary text-sm font-mono whitespace-pre-wrap leading-relaxed border border-border">
-                    {finalOutput}
+                >
+                  <div className={cn(
+                    "mt-1 flex-shrink-0 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-300",
+                    entry.selected 
+                      ? "bg-primary border-primary" 
+                      : "bg-transparent border-white/10 group-hover:border-primary/50"
+                  )}>
+                    {entry.selected && <CheckCircle className="w-4 h-4 text-primary-foreground" />}
                   </div>
+                  <div className="space-y-2 flex-1">
+                    <p className={cn(
+                      "text-base leading-relaxed transition-colors",
+                      entry.selected ? "text-white font-semibold" : "text-foreground/80 group-hover:text-foreground"
+                    )}>
+                      {entry.message}
+                    </p>
+                    <div className="flex items-center gap-3">
+                      <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded border border-white/5">
+                        SHA {entry.id}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* AI Processor Column */}
+          <div className="lg:col-span-5 space-y-8">
+            <div className="sticky top-32 space-y-8">
+              <div className="p-8 rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl space-y-8 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 bg-primary/20 blur-[60px] rounded-full" />
+                
+                <div className="flex items-center gap-4 relative">
+                  <div className="w-14 h-14 rounded-2xl bg-primary shadow-xl shadow-primary/20 flex items-center justify-center">
+                    <BrainCircuit className="w-8 h-8 text-primary-foreground" />
+                  </div>
+                  <div>
+                    <h2 className="font-headline font-bold text-2xl">AI Processor</h2>
+                    <p className="text-sm text-muted-foreground">Ready to analyze changes.</p>
+                  </div>
+                </div>
+
+                <div className="space-y-6 relative">
+                  <div className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5">
+                    <div className="flex items-center gap-3 text-sm">
+                      <Layers className="w-4 h-4 text-primary" />
+                      <span className="text-muted-foreground">Context Size:</span>
+                    </div>
+                    <span className="text-foreground font-black text-xl">{entries.filter(e => e.selected).length}</span>
+                  </div>
+                  
                   <Button 
-                    variant="outline" 
-                    className="w-full rounded-full"
-                    onClick={exportMarkdown}
+                    className="w-full h-16 bg-primary hover:bg-primary/90 text-lg font-bold rounded-2xl shadow-xl shadow-primary/30 group disabled:opacity-50"
+                    disabled={isProcessing}
+                    onClick={handleGenerate}
                   >
-                    <Download className="w-4 h-4 mr-2" />
-                    Export Markdown
+                    {isProcessing ? (
+                      <div className="flex items-center gap-3">
+                        <Loader2 className="w-6 h-6 animate-spin" />
+                        <span>Synthesizing...</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-3">
+                        <span>Synthesize Release Notes</span>
+                        <Sparkles className="w-6 h-6 transition-transform group-hover:rotate-12" />
+                      </div>
+                    )}
                   </Button>
                 </div>
-              )}
-            </div>
 
-            <div className="p-6 rounded-2xl border border-primary/20 bg-primary/5 flex items-start gap-4">
-              <Sparkles className="w-5 h-5 text-primary mt-1" />
-              <div className="space-y-1">
-                <h4 className="text-sm font-bold">Pro Tip</h4>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Group similar features or fixes together to get a more coherent summary from the AI.
-                </p>
+                {finalOutput && (
+                  <div className="pt-8 border-t border-white/10 space-y-6 animate-fade-in relative">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary">Preview Result</h3>
+                      <Terminal className="w-4 h-4 text-muted-foreground" />
+                    </div>
+                    <div className="p-6 rounded-2xl bg-black/40 text-sm font-mono whitespace-pre-wrap leading-relaxed border border-white/10 shadow-inner max-h-[400px] overflow-auto">
+                      {finalOutput}
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      className="w-full h-14 rounded-2xl border-white/10 hover:bg-white/5 text-base font-bold"
+                      onClick={exportMarkdown}
+                    >
+                      <Download className="w-5 h-5 mr-2" />
+                      Export as Markdown
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              <div className="p-6 rounded-2xl border border-primary/20 bg-primary/5 flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="text-sm font-bold text-white">Engine Optimization</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    The AI performs best when you group related changes together. Try selecting 3-7 commits for a single summary.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
