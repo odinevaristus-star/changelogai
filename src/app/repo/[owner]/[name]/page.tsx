@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import { Navbar } from "@/components/layout/Navbar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { GitCommit, ArrowLeft, Loader2, Sparkles, ExternalLink, RefreshCw } from "lucide-react"
+import { GitCommit, ArrowLeft, Loader2, Sparkles, ExternalLink, RefreshCw, Github } from "lucide-react"
 import { fetchGitHubCommits } from "@/app/actions/github-actions"
 import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
@@ -63,104 +63,110 @@ export default function RepoCommitsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center space-y-4">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
-        <p className="text-sm text-muted-foreground font-medium animate-pulse">Syncing commit history...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center space-y-4 bg-background">
+        <Loader2 className="w-6 h-6 text-primary animate-spin" />
+        <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest animate-pulse">Syncing git log...</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-20 px-4">
+    <div className="min-h-screen pt-24 pb-20 px-4 bg-background">
       <Navbar />
-      <div className="max-w-4xl mx-auto space-y-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
-              <ArrowLeft className="w-5 h-5" />
+      <div className="max-w-4xl mx-auto space-y-10 animate-fade-in">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-border pb-8">
+          <div className="flex items-center gap-5">
+            <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded hover:bg-white/5 border border-transparent hover:border-border">
+              <ArrowLeft className="w-4 h-4" />
             </Button>
             <div>
-              <h1 className="text-3xl font-headline font-bold">{repo}</h1>
-              <p className="text-sm text-muted-foreground">Source: github.com/{owner}/{repo}</p>
+              <div className="flex items-center gap-2 mb-1">
+                <Github className="w-4 h-4 text-muted-foreground" />
+                <h1 className="text-2xl font-bold text-white tracking-tight">{repo}</h1>
+              </div>
+              <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">{owner} / {repo}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={handleRetry} className="rounded-full">
-              <RefreshCw className="w-4 h-4 mr-2" />
+            <Button variant="outline" size="sm" onClick={handleRetry} className="rounded border-border h-9 text-xs font-bold uppercase tracking-wider">
+              <RefreshCw className="w-3.5 h-3.5 mr-2" />
               Refresh
             </Button>
-            <Button className="rounded-full bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20" asChild>
+            <Button className="h-9 px-5 rounded text-xs font-bold uppercase tracking-wider bg-white text-black hover:bg-white/90" asChild>
               <Link href="/generator">
-                <Sparkles className="w-4 h-4 mr-2" />
-                Generate Changelog
+                <Sparkles className="w-3.5 h-3.5 mr-2" />
+                Synthesize
               </Link>
             </Button>
           </div>
         </div>
 
         {error ? (
-          <Card className="border-destructive/20 bg-destructive/5 overflow-hidden">
-            <CardContent className="py-12 text-center space-y-4">
-              <div className="w-12 h-12 bg-destructive/10 rounded-full flex items-center justify-center mx-auto">
-                <ExternalLink className="w-6 h-6 text-destructive" />
+          <Card className="border-destructive/20 bg-destructive/5 rounded-lg">
+            <CardContent className="py-10 text-center space-y-5">
+              <div className="w-10 h-10 bg-destructive/10 rounded flex items-center justify-center mx-auto border border-destructive/20">
+                <ExternalLink className="w-5 h-5 text-destructive" />
               </div>
               <div className="space-y-1">
-                <p className="text-destructive font-bold text-lg">Authentication Failed</p>
-                <p className="text-muted-foreground max-w-sm mx-auto">{error}</p>
+                <p className="text-sm font-bold text-white uppercase tracking-wider">Auth Failed</p>
+                <p className="text-xs text-muted-foreground max-w-sm mx-auto">{error}</p>
               </div>
-              <Button onClick={() => router.push("/sync")} variant="default" className="rounded-full px-8">
-                Go to Sync Settings
+              <Button onClick={() => router.push("/sync")} variant="default" className="rounded px-8 h-10 text-xs font-bold uppercase tracking-widest">
+                Update Token
               </Button>
             </CardContent>
           </Card>
         ) : commits.length === 0 ? (
-          <div className="text-center py-24 border border-dashed rounded-3xl bg-secondary/10">
-            <GitCommit className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-20" />
-            <p className="text-muted-foreground font-medium">No recent commits found for this repository.</p>
+          <div className="text-center py-20 border border-dashed border-border rounded-lg bg-white/[0.01]">
+            <GitCommit className="w-8 h-8 text-muted-foreground/20 mx-auto mb-4" />
+            <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest">No commits found.</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            <div className="space-y-3">
-              {commits.map((commit) => (
+          <div className="space-y-6">
+            <div className="space-y-0 border border-border rounded-lg overflow-hidden bg-white/[0.01]">
+              {commits.map((commit, index) => (
                 <div 
                   key={commit.id} 
-                  className="group p-4 rounded-2xl border border-border bg-card/30 hover:bg-card hover:border-primary/40 transition-all duration-300 flex items-start gap-4"
+                  className={cn(
+                    "group p-4 flex items-start gap-4 hover:bg-white/[0.03] transition-colors",
+                    index !== commits.length - 1 && "border-b border-border"
+                  )}
                 >
-                  <div className="mt-1 p-2.5 rounded-xl bg-secondary flex-shrink-0 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                    <GitCommit className="w-4 h-4" />
+                  <div className="mt-1 p-2 rounded bg-secondary border border-border flex-shrink-0 group-hover:border-primary/50 transition-colors">
+                    <GitCommit className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
                   </div>
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center justify-between gap-4">
-                      <p className="text-sm font-semibold leading-relaxed tracking-tight text-foreground/90">{commit.message}</p>
+                      <p className="text-sm font-medium text-white/90 leading-snug tracking-tight">{commit.message}</p>
                       <a 
                         href={commit.url} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary transition-all flex-shrink-0"
+                        className="p-1.5 rounded hover:bg-white/10 text-muted-foreground hover:text-white transition-all flex-shrink-0"
                       >
-                        <ExternalLink className="w-4 h-4" />
+                        <ExternalLink className="w-3.5 h-3.5" />
                       </a>
                     </div>
-                    <div className="flex items-center gap-4 text-[11px] font-medium">
-                      <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-secondary text-muted-foreground font-mono">
+                    <div className="flex items-center gap-4 mono text-muted-foreground">
+                      <div className="flex items-center gap-1.5 px-1.5 py-0.5 rounded bg-secondary text-[11px] font-bold tracking-widest">
                         <span className="text-primary/70">#</span>
                         {commit.id}
                       </div>
-                      <span className="text-muted-foreground/40">•</span>
-                      <span className="text-foreground/70">{commit.author}</span>
-                      <span className="text-muted-foreground/40">•</span>
-                      <span className="text-muted-foreground">{new Date(commit.date).toLocaleDateString()} at {new Date(commit.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      <span className="opacity-30">•</span>
+                      <span className="text-[11px] font-bold tracking-wider">{commit.author}</span>
+                      <span className="opacity-30">•</span>
+                      <span className="text-[11px] tracking-wider">{new Date(commit.date).toLocaleDateString()}</span>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="pt-8 flex justify-center">
-              <Button size="lg" className="rounded-full px-12 h-14 text-lg font-bold bg-primary hover:bg-primary/90 shadow-xl shadow-primary/30 group" asChild>
+            <div className="pt-10 flex justify-center">
+              <Button size="lg" className="rounded h-12 px-10 text-xs font-bold uppercase tracking-[0.2em] bg-white text-black hover:bg-white/90 shadow-lg shadow-white/5 active:scale-[0.98] transition-all group" asChild>
                 <Link href="/generator">
-                  Synthesize These Changes
-                  <Sparkles className="ml-3 w-5 h-5 group-hover:animate-spin-slow" />
+                  Generate Release Notes
+                  <Sparkles className="ml-3 w-4 h-4 transition-transform group-hover:rotate-12" />
                 </Link>
               </Button>
             </div>
