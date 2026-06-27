@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { GitCommit, ArrowLeft, Loader2, Sparkles, ExternalLink, RefreshCw, Github } from "lucide-react"
 import { fetchGitHubCommits } from "@/app/actions/github-actions"
 import { useToast } from "@/hooks/use-toast"
+import { cn } from "@/lib/utils"
 import Link from "next/link"
 
 export default function RepoCommitsPage() {
@@ -19,8 +20,8 @@ export default function RepoCommitsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const owner = params.owner as string
-  const repo = params.name as string
+  const owner = params?.owner as string
+  const repo = params?.name as string
 
   useEffect(() => {
     if (!owner || !repo) return
