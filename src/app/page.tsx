@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Navbar } from "@/components/layout/Navbar"
-import { ArrowRight, GitBranch, History, Sparkles, Github, Globe, Cpu, Zap } from "lucide-react"
+import { ArrowRight, GitBranch, History, Sparkles, Github, Zap } from "lucide-react"
 
 export default function LandingPage() {
   return (
@@ -89,10 +89,10 @@ export default function LandingPage() {
           </div>
           
           <div className="flex gap-8 text-xs font-medium">
+            <Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link>
             <Link href="#" className="hover:text-white transition-colors">Docs</Link>
             <Link href="#" className="hover:text-white transition-colors">Privacy</Link>
             <Link href="#" className="hover:text-white transition-colors">GitHub</Link>
-            <Link href="#" className="hover:text-white transition-colors">Contact</Link>
           </div>
           
           <p className="text-[10px] uppercase tracking-widest font-mono">© 2024 ChangelogAI V2.1</p>

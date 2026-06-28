@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Zap, LayoutDashboard, GitBranch, History, Menu, X } from "lucide-react"
+import { Zap, LayoutDashboard, GitBranch, History, Menu, X, DollarSign } from "lucide-react"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { useState } from "react"
@@ -14,6 +14,7 @@ export function Navbar() {
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Sync", href: "/sync", icon: GitBranch },
     { name: "Generator", href: "/generator", icon: Zap },
+    { name: "Pricing", href: "/pricing", icon: DollarSign },
     { name: "Timeline", href: "/timeline", icon: History },
   ]
 
