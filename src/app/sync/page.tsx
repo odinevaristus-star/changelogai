@@ -12,7 +12,8 @@ import {
   Key,
   ShieldCheck,
   Search,
-  Check
+  Check,
+  Globe
 } from "lucide-react"
 import { 
   Dialog, 
