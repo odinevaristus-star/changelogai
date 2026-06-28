@@ -1,12 +1,11 @@
-
 "use client"
 
+import { useState } from "react"
 import { Navbar } from "@/components/layout/Navbar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Check, Zap, Shield, Users } from "lucide-react"
-import Link from "next/link"
+import { Check, Shield, Zap, Users } from "lucide-react"
 
 const tiers = [
   {
@@ -56,6 +55,42 @@ const tiers = [
 ]
 
 export default function PricingPage() {
+  const [loading, setLoading] = useState(false);
+
+  const handleUpgrade = async (tierName: string) => {
+    if (tierName === "Free") {
+      window.location.href = "/sync";
+      return;
+    }
+    if (tierName === "Team") {
+      window.location.href = "mailto:odinevaristus@gmail.com?subject=ChangelogAI Team Plan";
+      return;
+    }
+    setLoading(true);
+    const email = prompt("Enter your email to continue:");
+    if (!email) {
+      setLoading(false);
+      return;
+    }
+    try {
+      const res = await fetch("/api/paystack/initialize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, plan: tierName.toLowerCase() }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("Payment failed to initialize. Please try again.");
+        setLoading(false);
+      }
+    } catch (error) {
+      alert("An error occurred. Please try again.");
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen pt-24 pb-20 px-4 bg-background">
       <Navbar />
@@ -102,11 +137,13 @@ export default function PricingPage() {
               </CardContent>
               <CardFooter>
                 <Button 
-                  asChild 
+                  asChild={false}
                   variant={tier.buttonVariant} 
                   className={`w-full h-11 font-bold uppercase tracking-widest text-[11px] rounded transition-all active:scale-[0.98] ${tier.buttonVariant === 'default' ? 'bg-white text-black hover:bg-white/90' : 'border-border hover:bg-white/5'}`}
+                  onClick={() => handleUpgrade(tier.name)}
+                  disabled={loading}
                 >
-                  <Link href="/sync">{tier.buttonText}</Link>
+                  {loading ? "Loading..." : tier.buttonText}
                 </Button>
               </CardFooter>
             </Card>
