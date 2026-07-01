@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Redis } from '@upstash/redis';
+
+const redis = Redis.fromEnv();
 
 export async function GET(req: NextRequest) {
   try {
@@ -21,10 +24,15 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Payment not successful' }, { status: 400 });
     }
 
+    const email = data.data.customer.email;
     const plan = data.data.metadata?.plan || 'pro';
 
-    return NextResponse.json({ success: true, plan, email: data.data.customer.email });
+    await redis.set(`user:${email}:isPro`, true);
+    await redis.set(`user:${email}:plan`, plan);
+
+    return NextResponse.json({ success: true, plan, email });
   } catch (error) {
+    console.error('Verify error:', error);
     return NextResponse.json({ error: 'Verification failed' }, { status: 500 });
   }
 }
