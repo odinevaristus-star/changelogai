@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -6,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Check, Shield, Zap, Users } from "lucide-react"
+import { useSession } from "next-auth/react"
 
 const tiers = [
   {
@@ -56,6 +58,7 @@ const tiers = [
 
 export default function PricingPage() {
   const [loading, setLoading] = useState(false);
+  const { data: session } = useSession();
 
   const handleUpgrade = async (tierName: string) => {
     if (tierName === "Free") {
@@ -67,11 +70,14 @@ export default function PricingPage() {
       return;
     }
     setLoading(true);
-    const email = prompt("Enter your email to continue:");
+    
+    const email = session?.user?.email;
     if (!email) {
+      alert("Please sign in first to upgrade.");
       setLoading(false);
       return;
     }
+
     try {
       const res = await fetch("/api/paystack/initialize", {
         method: "POST",

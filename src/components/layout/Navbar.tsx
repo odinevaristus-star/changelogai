@@ -1,13 +1,17 @@
+
 "use client"
 
 import Link from "next/link"
-import { Zap, LayoutDashboard, GitBranch, History, Menu, X, DollarSign } from "lucide-react"
+import { Zap, LayoutDashboard, GitBranch, History, Menu, X, DollarSign, LogIn, LogOut } from "lucide-react"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { useState } from "react"
+import { useSession, signIn, signOut } from "next-auth/react"
+import { Button } from "@/components/ui/button"
 
 export function Navbar() {
   const pathname = usePathname()
+  const { data: session } = useSession()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const navItems = [
@@ -31,26 +35,52 @@ export function Navbar() {
         </Link>
         
         {/* Desktop Menu */}
-        <div className="hidden md:flex items-center gap-1">
-          {navItems.map((item) => {
-            const Icon = item.icon
-            const isActive = pathname === item.href
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-colors",
-                  isActive 
-                    ? "text-white bg-white/10 font-medium" 
-                    : "text-muted-foreground hover:text-white hover:bg-white/5"
-                )}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                <span>{item.name}</span>
-              </Link>
-            )
-          })}
+        <div className="hidden md:flex items-center gap-4">
+          <div className="flex items-center gap-1">
+            {navItems.map((item) => {
+              const Icon = item.icon
+              const isActive = pathname === item.href
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-colors",
+                    isActive 
+                      ? "text-white bg-white/10 font-medium" 
+                      : "text-muted-foreground hover:text-white hover:bg-white/5"
+                  )}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  <span>{item.name}</span>
+                </Link>
+              )
+            })}
+          </div>
+
+          <div className="h-4 w-px bg-border/50 mx-1" />
+
+          {session ? (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-muted-foreground hover:text-white h-8 text-xs font-bold uppercase tracking-wider"
+              onClick={() => signOut()}
+            >
+              <LogOut className="w-3.5 h-3.5 mr-2" />
+              Sign Out
+            </Button>
+          ) : (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="border-border hover:bg-white/5 h-8 text-xs font-bold uppercase tracking-wider"
+              onClick={() => signIn('github')}
+            >
+              <LogIn className="w-3.5 h-3.5 mr-2" />
+              Sign In
+            </Button>
+          )}
         </div>
 
         {/* Mobile Toggle */}
@@ -83,6 +113,27 @@ export function Navbar() {
               </Link>
             )
           })}
+          <div className="p-3">
+            {session ? (
+              <Button 
+                variant="outline" 
+                className="w-full justify-start h-10 text-xs font-bold uppercase"
+                onClick={() => signOut()}
+              >
+                <LogOut className="w-4 h-4 mr-3" />
+                Sign Out
+              </Button>
+            ) : (
+              <Button 
+                variant="outline" 
+                className="w-full justify-start h-10 text-xs font-bold uppercase"
+                onClick={() => signIn('github')}
+              >
+                <LogIn className="w-4 h-4 mr-3" />
+                Sign In
+              </Button>
+            )}
+          </div>
         </div>
       )}
     </nav>
