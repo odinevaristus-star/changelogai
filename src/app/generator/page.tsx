@@ -41,6 +41,17 @@ export default function GeneratorPage() {
       return
     }
 
+    const usageRes = await fetch("/api/usage/check", { method: "POST" });
+    const usageData = await usageRes.json();
+    if (!usageData.allowed) {
+      toast({
+        title: "Monthly limit reached",
+        description: "Free plan includes 3 changelog generations per month. Upgrade to Pro for unlimited generations.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsProcessing(true)
     try {
       const { summary } = await generateFeatureSummary({
