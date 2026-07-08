@@ -2,7 +2,10 @@ import NextAuth from 'next-auth';
 import GitHub from 'next-auth/providers/github';
 import { Redis } from "@upstash/redis";
 
-const redis = Redis.fromEnv();
+const redis = new Redis({
+  url: process.env.KV_REST_API_URL!,
+  token: process.env.KV_REST_API_TOKEN!,
+});
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
