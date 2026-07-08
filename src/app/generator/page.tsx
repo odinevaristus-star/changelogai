@@ -9,6 +9,17 @@ import { useToast } from "@/hooks/use-toast"
 import { categorizeChangelogEntry } from "@/ai/flows/categorize-changelog-entry-flow"
 import { generateFeatureSummary } from "@/ai/flows/generate-feature-summary-flow"
 import { cn } from "@/lib/utils"
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
+import { useRouter } from "next/navigation";
 
 type Entry = {
   id: string
@@ -24,6 +35,8 @@ export default function GeneratorPage() {
   )
   const [isProcessing, setIsProcessing] = useState(false)
   const [finalOutput, setFinalOutput] = useState<string | null>(null)
+  const [showLimitDialog, setShowLimitDialog] = useState(false);
+  const router = useRouter();
   const { toast } = useToast()
 
   const toggleSelection = (id: string) => {
@@ -44,11 +57,7 @@ export default function GeneratorPage() {
     const usageRes = await fetch("/api/usage/check", { method: "POST" });
     const usageData = await usageRes.json();
     if (!usageData.allowed) {
-      toast({
-        title: "Monthly limit reached",
-        description: "Free plan includes 3 changelog generations per month. Upgrade to Pro for unlimited generations.",
-        variant: "destructive",
-      });
+      setShowLimitDialog(true);
       return;
     }
 
@@ -221,6 +230,22 @@ export default function GeneratorPage() {
           </div>
         </div>
       </div>
+      <AlertDialog open={showLimitDialog} onOpenChange={setShowLimitDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Monthly limit reached</AlertDialogTitle>
+            <AlertDialogDescription>
+              You've used all 3 free changelog generations this month. Upgrade to Pro for unlimited generations, private repo sync, and Markdown export.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Maybe later</AlertDialogCancel>
+            <AlertDialogAction onClick={() => router.push('/pricing')}>
+              Upgrade to Pro
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
