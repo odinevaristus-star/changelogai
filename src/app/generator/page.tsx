@@ -20,6 +20,7 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 type Entry = {
   id: string
@@ -30,6 +31,7 @@ type Entry = {
 }
 
 export default function GeneratorPage() {
+  const { data: session } = useSession()
   const [entries, setEntries] = useState<Entry[]>(
     MOCK_COMMITS.map(c => ({ ...c, selected: false }))
   )
@@ -88,13 +90,18 @@ export default function GeneratorPage() {
   }
 
   const exportMarkdown = () => {
-    if (!finalOutput) return
-    const blob = new Blob([finalOutput], { type: 'text/markdown' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `changelog-${new Date().toISOString().split('T')[0]}.md`
-    a.click()
+    if (!finalOutput) return;
+    // @ts-ignore - session user interface extension
+    if (!session?.user?.isPro) {
+      setShowLimitDialog(true);
+      return;
+    }
+    const blob = new Blob([finalOutput], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `changelog-${new Date().toISOString().split('T')[0]}.md`;
+    a.click();
   }
 
   return (
