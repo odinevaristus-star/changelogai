@@ -8,6 +8,15 @@ import { cn } from "@/lib/utils"
 import { useState } from "react"
 import { useSession, signIn, signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 export function Navbar() {
   const pathname = usePathname()
@@ -61,15 +70,23 @@ export function Navbar() {
           <div className="h-4 w-px bg-border/50 mx-1" />
 
           {session ? (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-muted-foreground hover:text-white h-8 text-xs font-bold uppercase tracking-wider"
-              onClick={() => signOut()}
-            >
-              <LogOut className="w-3.5 h-3.5 mr-2" />
-              Sign Out
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="rounded-full overflow-hidden w-8 h-8 border border-white/20 mr-2">
+                  <Avatar className="w-8 h-8">
+                    <AvatarImage src={session.user?.image || ""} alt={session.user?.name || "User"} />
+                    <AvatarFallback>{session.user?.name?.[0] || "U"}</AvatarFallback>
+                  </Avatar>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>{session.user?.name || session.user?.email}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => signOut()}>
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <Button 
               variant="outline" 
@@ -85,14 +102,23 @@ export function Navbar() {
 
         <div className="flex items-center">
           {session ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-xs font-bold uppercase mr-2"
-              onClick={() => signOut()}
-            >
-              Sign Out
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="rounded-full overflow-hidden w-8 h-8 border border-white/20 mr-2">
+                  <Avatar className="w-8 h-8">
+                    <AvatarImage src={session.user?.image || ""} alt={session.user?.name || "User"} />
+                    <AvatarFallback>{session.user?.name?.[0] || "U"}</AvatarFallback>
+                  </Avatar>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>{session.user?.name || session.user?.email}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => signOut()}>
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <Button
               variant="outline"
@@ -137,14 +163,23 @@ export function Navbar() {
           })}
           <div className="p-3">
             {session ? (
-              <Button 
-                variant="outline" 
-                className="w-full justify-start h-10 text-xs font-bold uppercase"
-                onClick={() => signOut()}
-              >
-                <LogOut className="w-4 h-4 mr-3" />
-                Sign Out
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="rounded-full overflow-hidden w-8 h-8 border border-white/20 mr-2">
+                    <Avatar className="w-8 h-8">
+                      <AvatarImage src={session.user?.image || ""} alt={session.user?.name || "User"} />
+                      <AvatarFallback>{session.user?.name?.[0] || "U"}</AvatarFallback>
+                    </Avatar>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>{session.user?.name || session.user?.email}</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => signOut()}>
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <Button 
                 variant="outline" 
