@@ -104,7 +104,7 @@ export function Navbar() {
           {session ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="rounded-full overflow-hidden w-8 h-8 border border-white/20 mr-2">
+                <button className="md:hidden rounded-full overflow-hidden w-8 h-8 border border-white/20 mr-2">
                   <Avatar className="w-8 h-8">
                     <AvatarImage src={session.user?.image || ""} alt={session.user?.name || "User"} />
                     <AvatarFallback>{session.user?.name?.[0] || "U"}</AvatarFallback>
@@ -123,7 +123,7 @@ export function Navbar() {
             <Button
               variant="outline"
               size="sm"
-              className="text-xs font-bold uppercase mr-2"
+              className="md:hidden text-xs font-bold uppercase mr-2"
               onClick={() => signIn('github')}
             >
               Sign In
