@@ -27,6 +27,7 @@ export async function fetchGitHubRepos(token: string) {
       provider: 'github' as const,
       lastSync: repo.updated_at,
       url: repo.html_url,
+      private: repo.private,
     }));
   } catch (error: any) {
     console.error('GitHub API Error:', error);
