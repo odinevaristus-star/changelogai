@@ -27,6 +27,7 @@ import {
 import { useToast } from "@/hooks/use-toast"
 import { fetchGitHubRepos } from "@/app/actions/github-actions"
 import Link from "next/link"
+import { useSession } from "next-auth/react"
 
 export default function SyncPage() {
   const [syncedProjects, setSyncedProjects] = useState<any[]>([])
@@ -34,6 +35,7 @@ export default function SyncPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const { toast } = useToast()
+  const { data: session } = useSession()
 
   useEffect(() => {
     const savedToken = localStorage.getItem("github_pat")
@@ -44,14 +46,17 @@ export default function SyncPage() {
   }, [])
 
   const autoSync = async (activeToken: string) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const repos = await fetchGitHubRepos(activeToken)
-      setSyncedProjects(repos)
+      const repos = await fetchGitHubRepos(activeToken);
+      // @ts-ignore - session user interface extension
+      const isPro = session?.user?.isPro;
+      const filteredRepos = isPro ? repos : repos.filter((repo: any) => !repo.private);
+      setSyncedProjects(filteredRepos);
     } catch (error: any) {
-      console.error("Auto-sync failed", error)
+      console.error("Auto-sync failed", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
