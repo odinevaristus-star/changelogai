@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -35,15 +36,15 @@ export default function SyncPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const { toast } = useToast()
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
 
   useEffect(() => {
     const savedToken = localStorage.getItem("github_pat")
-    if (savedToken) {
+    if (savedToken && status !== "loading") {
       setToken(savedToken)
       autoSync(savedToken)
     }
-  }, [])
+  }, [session, status])
 
   const autoSync = async (activeToken: string) => {
     setIsLoading(true);
@@ -73,12 +74,15 @@ export default function SyncPage() {
     setIsLoading(true)
     try {
       const repos = await fetchGitHubRepos(token)
-      setSyncedProjects(repos)
+      // @ts-ignore - session user interface extension
+      const isPro = session?.user?.isPro;
+      const filteredRepos = isPro ? repos : repos.filter((repo: any) => !repo.private);
+      setSyncedProjects(filteredRepos)
       localStorage.setItem("github_pat", token)
       setIsOpen(false)
       toast({
         title: "GitHub Connected",
-        description: `Successfully imported ${repos.length} repositories.`
+        description: `Successfully imported ${filteredRepos.length} repositories.`
       })
     } catch (error: any) {
       toast({
