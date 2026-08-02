@@ -9,8 +9,9 @@ export default function TimelinePage() {
   const updates = [
     {
       id: "v2.5.0",
-      date: "June 15, 2024",
+      date: "March 5, 2025",
       title: "Advanced Search & Performance Improvements",
+      author: "@odinevaristus",
       categories: [
         { name: "Features", color: "bg-primary" },
         { name: "Improvements", color: "bg-accent" }
@@ -26,6 +27,7 @@ export default function TimelinePage() {
       id: "v2.4.0",
       date: "May 22, 2024",
       title: "Security & UI Enhancements",
+      author: "@alex.rivera",
       categories: [
         { name: "Features", color: "bg-primary" },
         { name: "Improvements", color: "bg-accent" }
@@ -41,6 +43,7 @@ export default function TimelinePage() {
       id: "v2.3.9",
       date: "May 21, 2024",
       title: "Stability Patch",
+      author: "@alex.rivera",
       categories: [
         { name: "Bug Fixes", color: "bg-destructive" }
       ],
@@ -124,7 +127,7 @@ export default function TimelinePage() {
                     <ExternalLink className="ml-2 w-3 h-3" />
                   </Button>
                   <div className="text-[10px] text-muted-foreground font-mono">
-                    Updated by @alex.rivera
+                    Updated by {update.author}
                   </div>
                 </div>
               </div>
