@@ -8,6 +8,21 @@ import { Calendar, Download, ExternalLink, Share2, Tag } from "lucide-react"
 export default function TimelinePage() {
   const updates = [
     {
+      id: "v2.5.0",
+      date: "June 15, 2024",
+      title: "Advanced Search & Performance Improvements",
+      categories: [
+        { name: "Features", color: "bg-primary" },
+        { name: "Improvements", color: "bg-accent" }
+      ],
+      description: "This update introduces advanced search filtering capabilities to the dashboard, significantly improving your ability to find specific information. Additionally, you'll experience faster image loading in the feed and enhanced overall application stability and performance.",
+      points: [
+        "Added advanced search filtering to the dashboard",
+        "Resolved a memory leak in the WebSocket handler",
+        "Optimized image loading in the feed component"
+      ]
+    },
+    {
       id: "v2.4.0",
       date: "May 22, 2024",
       title: "Security & UI Enhancements",
