@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         email,
         amount,
-        callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment/callback`,
+        callback_url: 'https://changelogai-app.vercel.app/payment/callback',
         metadata: { plan },
       }),
     });
