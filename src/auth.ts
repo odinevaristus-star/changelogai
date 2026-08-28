@@ -14,6 +14,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       clientSecret: process.env.GITHUB_SECRET!,
     }),
   ],
+  /*
   callbacks: {
     async session({ session, token }) {
       if (session.user) {
@@ -25,4 +26,5 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
   },
+  */
 });
