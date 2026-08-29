@@ -18,9 +18,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.sub!;
-        const isPro = await redis.get(`user:${session.user.email}:isPro`);
-        // @ts-ignore - session user interface extension
-        session.user.isPro = isPro === true || isPro === "true";
+        try {
+          const isPro = await redis.get(`user:${session.user.email}:isPro`);
+          // @ts-ignore - session user interface extension
+          session.user.isPro = isPro === true || isPro === "true";
+        } catch (e) {
+          // @ts-ignore
+          session.user.isPro = false;
+        }
       }
       return session;
     },
