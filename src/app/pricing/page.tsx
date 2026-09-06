@@ -26,7 +26,7 @@ const tiers = [
   },
   {
     name: "Pro",
-    price: "$9",
+    price: "₦14,000",
     description: "For active builders shipping weekly updates.",
     features: [
       "Unlimited generations",
