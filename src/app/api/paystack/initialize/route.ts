@@ -4,7 +4,7 @@ export async function POST(req: NextRequest) {
   try {
     const { email, plan } = await req.json();
 
-    const amount = plan === 'team' ? 2900 * 100 : 900 * 100;
+    const amount = 1400000;
 
     const response = await fetch('https://api.paystack.co/transaction/initialize', {
       method: 'POST',
