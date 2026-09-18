@@ -10,16 +10,29 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const reference = searchParams.get('reference');
+    const email = searchParams.get('email');
+
+    // Plan check mode — just read from Redis
+    if (reference === 'check' && email) {
+      const plan = await redis.get(`user:${email}:plan`);
+      const isPro = await redis.get(`user:${email}:isPro`);
+      return NextResponse.json({
+        plan: isPro ? 'pro' : (plan || 'free'),
+      });
+    }
 
     if (!reference) {
       return NextResponse.json({ error: 'No reference provided' }, { status: 400 });
     }
 
-    const response = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
-      headers: {
-        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-      },
-    });
+    const response = await fetch(
+      `https://api.paystack.co/transaction/verify/${reference}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+        },
+      }
+    );
 
     const data = await response.json();
 
@@ -27,13 +40,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Payment not successful' }, { status: 400 });
     }
 
-    const email = data.data.customer.email;
+    const userEmail = data.data.customer.email;
     const plan = data.data.metadata?.plan || 'pro';
 
-    await redis.set(`user:${email}:isPro`, true);
-    await redis.set(`user:${email}:plan`, plan);
+    await redis.set(`user:${userEmail}:isPro`, true);
+    await redis.set(`user:${userEmail}:plan`, plan);
 
-    return NextResponse.json({ success: true, plan, email });
+    return NextResponse.json({ success: true, plan, email: userEmail });
   } catch (error) {
     console.error('Verify error:', error);
     return NextResponse.json({ error: 'Verification failed' }, { status: 500 });
