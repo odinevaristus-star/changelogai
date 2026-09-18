@@ -14,11 +14,9 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (session?.user?.email) {
-      fetch(`/api/paystack/verify?reference=check&email=${session.user.email}`)
+      fetch(`/api/user/plan?email=${session.user.email}`)
         .then(res => res.json())
-        .then(data => {
-          if (data.plan) setPlan(data.plan)
-        })
+        .then(data => { if (data.plan) setPlan(data.plan) })
         .catch(() => {})
     }
   }, [session])
@@ -31,7 +29,7 @@ export default function DashboardPage() {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-3xl font-headline font-bold">Dashboard</h1>
-              <span className={`text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wide ${plan === "pro" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}>
+              <span className={`text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide ${plan === "pro" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-200"}`}>
                 {plan === "pro" ? "PRO" : "FREE"}
               </span>
             </div>
