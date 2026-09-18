@@ -87,8 +87,7 @@ export default function DashboardPage() {
   )
 }
 
-// @ts-ignore
-function StatCard({ title, value, description, icon: Icon }) {
+function StatCard({ title, value, description, icon: Icon }: any) {
   return (
     <Card className="bg-card/5">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
