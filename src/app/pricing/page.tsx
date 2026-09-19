@@ -12,7 +12,7 @@ import { useSession } from "next-auth/react"
 const tiers = [
   {
     name: "Free",
-    price: "$0",
+    price: "₦0",
     description: "For individual developers exploring AI synthesis.",
     features: [
       "3 generations per month",
