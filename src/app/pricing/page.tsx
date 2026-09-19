@@ -41,7 +41,7 @@ const tiers = [
   },
   {
     name: "Team",
-    price: "$29",
+    price: "₦29,000",
     description: "For engineering teams scaling their context.",
     features: [
       "Everything in Pro",
