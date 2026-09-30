@@ -29,7 +29,7 @@ export default function DashboardPage() {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-3xl font-headline font-bold">Dashboard</h1>
-              <span className={`text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide ${plan === "pro" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-200"}`}>
+              <span className={`text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide ${plan === "pro" ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}`}>
                 {plan === "pro" ? "PRO" : "FREE"}
               </span>
             </div>
