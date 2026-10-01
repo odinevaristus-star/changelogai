@@ -4,8 +4,8 @@ export async function POST(req: NextRequest) {
   try {
     const { email, plan } = await req.json();
 
-    // Amount in kobo (200,000 kobo = ₦2,000)
-    const amount = 200000;
+    // Amount in kobo (1,400,000 kobo = ₦14,000)
+    const amount = 1400000;
 
     const response = await fetch('https://api.paystack.co/transaction/initialize', {
       method: 'POST',
