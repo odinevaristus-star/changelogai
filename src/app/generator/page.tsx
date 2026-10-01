@@ -76,7 +76,7 @@ export default function GeneratorPage() {
       setFinalOutput(`### ${category}\n\n${summary}`)
       toast({
         title: "Synthesis Complete",
-        description: "AI has successfully analyzed your changes."
+        description: "Your changelog is ready!"
       })
     } catch (error) {
       toast({
