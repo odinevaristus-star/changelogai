@@ -38,6 +38,9 @@ export default function SyncPage() {
   const { data: session, status } = useSession()
 
   useEffect(() => {
+    // Clear old repo selection when session changes
+    localStorage.removeItem('github_selected_repo')
+    
     const savedToken = localStorage.getItem("github_pat")
     if (savedToken && status !== "loading") {
       setToken(savedToken)
