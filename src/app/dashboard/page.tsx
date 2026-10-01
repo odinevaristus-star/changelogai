@@ -41,9 +41,9 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <StatCard title="Total Commits" value="124" description="Synced this month" icon={GitBranch} />
-          <StatCard title="AI Summaries" value="12" description="Generated notes" icon={Zap} />
-          <StatCard title="Timeline Posts" value="8" description="Published updates" icon={History} />
+          <StatCard title="Total Commits" value="0" description="Connect a repo to get started" icon={GitBranch} />
+          <StatCard title="AI Summaries" value="0" description="Run synthesis to generate" icon={Zap} />
+          <StatCard title="Timeline Posts" value="0" description="Publish to your timeline" icon={History} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
