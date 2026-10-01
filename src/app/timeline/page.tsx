@@ -6,54 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Calendar, Download, ExternalLink, Share2, Tag } from "lucide-react"
 
 export default function TimelinePage() {
-  const updates = [
-    {
-      id: "v2.5.0",
-      date: "March 5, 2025",
-      title: "Advanced Search & Performance Improvements",
-      author: "@odinevaristus",
-      categories: [
-        { name: "Features", color: "bg-primary" },
-        { name: "Improvements", color: "bg-accent" }
-      ],
-      description: "This update introduces advanced search filtering capabilities to the dashboard, significantly improving your ability to find specific information. Additionally, you'll experience faster image loading in the feed and enhanced overall application stability and performance.",
-      points: [
-        "Added advanced search filtering to the dashboard",
-        "Resolved a memory leak in the WebSocket handler",
-        "Optimized image loading in the feed component"
-      ]
-    },
-    {
-      id: "v2.4.0",
-      date: "May 22, 2024",
-      title: "Security & UI Enhancements",
-      author: "@alex.rivera",
-      categories: [
-        { name: "Features", color: "bg-primary" },
-        { name: "Improvements", color: "bg-accent" }
-      ],
-      description: "This release focuses on strengthening our authentication infrastructure with Multi-Factor Authentication and optimizing performance for complex visual components.",
-      points: [
-        "Implemented secure MFA flows using time-based one-time passwords.",
-        "Refreshed architectural documentation for better onboarding.",
-        "Optimized image loading logic in the primary feed component."
-      ]
-    },
-    {
-      id: "v2.3.9",
-      date: "May 21, 2024",
-      title: "Stability Patch",
-      author: "@alex.rivera",
-      categories: [
-        { name: "Bug Fixes", color: "bg-destructive" }
-      ],
-      description: "Addressed critical performance bottlenecks in real-time communication protocols.",
-      points: [
-        "Fixed a memory leak in the WebSocket handler that affected long-running sessions.",
-        "Improved error handling for failed search filter requests."
-      ]
-    }
-  ]
+  const updates: any[] = []
 
   return (
     <div className="min-h-screen pt-24 pb-20 px-4">
@@ -62,7 +15,7 @@ export default function TimelinePage() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-2">
             <h1 className="text-4xl font-headline font-bold">Release Timeline</h1>
-            <p className="text-muted-foreground italic">Chronological feed of nebula-core updates.</p>
+            <p className="text-muted-foreground italic">Your published changelogs will appear here.</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" className="rounded-full">
@@ -79,6 +32,13 @@ export default function TimelinePage() {
         <div className="relative space-y-16">
           <div className="absolute left-0 md:left-4 top-0 bottom-0 w-[2px] timeline-line hidden md:block" />
           
+          {updates.length === 0 && (
+            <div className="text-center py-20 border border-dashed border-border rounded-2xl">
+              <p className="text-muted-foreground text-sm">No changelogs published yet.</p>
+              <p className="text-muted-foreground text-xs mt-2">Generate a changelog and publish it to see it here.</p>
+            </div>
+          )}
+
           {updates.map((update) => (
             <div key={update.id} className="relative md:pl-16 space-y-6 group">
               {/* Timeline Dot */}
@@ -98,7 +58,7 @@ export default function TimelinePage() {
               <div className="p-8 rounded-3xl border border-border bg-card/40 backdrop-blur-sm shadow-xl space-y-6 hover:border-primary/30 transition-all">
                 <div className="space-y-4">
                   <div className="flex flex-wrap gap-2">
-                    {update.categories.map((cat) => (
+                    {update.categories.map((cat: any) => (
                       <Badge key={cat.name} className={`${cat.color} text-primary-foreground font-bold uppercase tracking-wider text-[10px] rounded-sm`}>
                         {cat.name}
                       </Badge>
@@ -113,7 +73,7 @@ export default function TimelinePage() {
                 </div>
 
                 <ul className="space-y-3">
-                  {update.points.map((point, i) => (
+                  {update.points.map((point: string, i: number) => (
                     <li key={i} className="flex items-start gap-3 text-sm text-foreground/80">
                       <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary/40 shrink-0" />
                       {point}
