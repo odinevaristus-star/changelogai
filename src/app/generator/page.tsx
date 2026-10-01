@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Navbar } from "@/components/layout/Navbar"
 import { Button } from "@/components/ui/button"
-import { MOCK_COMMITS } from "@/lib/mock-data"
 import { Sparkles, BrainCircuit, Check, CheckCircle, Loader2, Download, Terminal, Layers, Github } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { categorizeChangelogEntry } from "@/ai/flows/categorize-changelog-entry-flow"
 import { generateFeatureSummary } from "@/ai/flows/generate-feature-summary-flow"
+import { fetchGitHubCommits } from "@/app/actions/github-actions"
 import { cn } from "@/lib/utils"
 import {
   AlertDialog,
@@ -32,14 +32,29 @@ type Entry = {
 
 export default function GeneratorPage() {
   const { data: session } = useSession()
-  const [entries, setEntries] = useState<Entry[]>(
-    MOCK_COMMITS.map(c => ({ ...c, selected: false }))
-  )
+  const [entries, setEntries] = useState<Entry[]>([])
+  const [loadingCommits, setLoadingCommits] = useState(true)
   const [isProcessing, setIsProcessing] = useState(false)
   const [finalOutput, setFinalOutput] = useState<string | null>(null)
   const [showLimitDialog, setShowLimitDialog] = useState(false);
   const router = useRouter();
   const { toast } = useToast()
+
+  useEffect(() => {
+    const token = localStorage.getItem('github_token')
+    const repo = localStorage.getItem('github_repo')
+    if (token && repo) {
+      const [owner, repoName] = repo.split('/')
+      fetchGitHubCommits(token, owner, repoName)
+        .then(commits => {
+          setEntries(commits.map((c: any) => ({ ...c, selected: false })))
+          setLoadingCommits(false)
+        })
+        .catch(() => setLoadingCommits(false))
+    } else {
+      setLoadingCommits(false)
+    }
+  }, [])
 
   const toggleSelection = (id: string) => {
     setEntries(prev => prev.map(e => e.id === id ? { ...e, selected: !e.selected } : e))
@@ -127,6 +142,8 @@ export default function GeneratorPage() {
             </header>
 
             <div className="space-y-2">
+              {loadingCommits && <p className="text-muted-foreground text-sm">Loading commits...</p>}
+              {!loadingCommits && entries.length === 0 && <p className="text-muted-foreground text-sm">No commits found. Make sure you have synced a repository first.</p>}
               {entries.map((entry) => (
                 <div 
                   key={entry.id} 
