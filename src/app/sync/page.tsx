@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -197,6 +196,7 @@ export default function SyncPage() {
                 <Link 
                   href={`/repo/${project.name}`} 
                   key={project.id} 
+                  onClick={() => localStorage.setItem('github_selected_repo', project.name)}
                   className="flex items-center justify-between p-4 rounded-lg border border-border bg-white/[0.01] hover:bg-white/[0.03] hover:border-border/80 transition-all group"
                 >
                   <div className="flex items-center gap-4">

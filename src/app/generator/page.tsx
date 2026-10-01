@@ -41,9 +41,8 @@ export default function GeneratorPage() {
   const { toast } = useToast()
 
   useEffect(() => {
-    // Note: Using 'github_token' as requested, though 'github_pat' is used elsewhere in the app
-    const token = localStorage.getItem('github_token') || localStorage.getItem('github_pat')
-    const repo = localStorage.getItem('github_repo')
+    const token = localStorage.getItem('github_pat')
+    const repo = localStorage.getItem('github_selected_repo')
     if (token && repo) {
       const [owner, repoName] = repo.split('/')
       fetchGitHubCommits(token, owner, repoName)
