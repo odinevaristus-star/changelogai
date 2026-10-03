@@ -1,12 +1,29 @@
 "use client"
 
 import { Navbar } from "@/components/layout/Navbar"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Calendar, Download, ExternalLink, Share2, Tag } from "lucide-react"
+import { Download, Share2 } from "lucide-react"
+import { useSession } from "next-auth/react"
+import { useEffect, useState } from "react"
 
 export default function TimelinePage() {
-  const updates: any[] = []
+  const { data: session } = useSession()
+  const [entries, setEntries] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (session?.user?.email) {
+      fetch(`/api/timeline/entries?email=${session.user.email}`)
+        .then(res => res.json())
+        .then(data => {
+          setEntries(data.entries || [])
+          setLoading(false)
+        })
+        .catch(() => setLoading(false))
+    } else {
+      setLoading(false)
+    }
+  }, [session])
 
   return (
     <div className="min-h-screen pt-24 pb-20 px-4">
@@ -19,81 +36,51 @@ export default function TimelinePage() {
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" className="rounded-full">
-              <Share2 className="w-4 h-4 mr-2" />
-              Share
+              <Share2 className="w-4 h-4 mr-2" />Share
             </Button>
             <Button variant="outline" size="sm" className="rounded-full">
-              <Download className="w-4 h-4 mr-2" />
-              Export All
+              <Download className="w-4 h-4 mr-2" />Export All
             </Button>
           </div>
         </div>
 
-        <div className="relative space-y-16">
-          <div className="absolute left-0 md:left-4 top-0 bottom-0 w-[2px] timeline-line hidden md:block" />
-          
-          {updates.length === 0 && (
-            <div className="text-center py-20 border border-dashed border-border rounded-2xl">
-              <p className="text-muted-foreground text-sm">No changelogs published yet.</p>
-              <p className="text-muted-foreground text-xs mt-2">Generate a changelog and publish it to see it here.</p>
-            </div>
-          )}
+        {loading && (
+          <div className="text-center py-20">
+            <p className="text-muted-foreground text-sm">Loading...</p>
+          </div>
+        )}
 
-          {updates.map((update) => (
-            <div key={update.id} className="relative md:pl-16 space-y-6 group">
-              {/* Timeline Dot */}
-              <div className="absolute left-0 md:left-[13px] top-1 w-3 h-3 rounded-full bg-primary border-4 border-background ring-4 ring-primary/20 hidden md:block" />
-              
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-secondary text-foreground text-xs font-bold font-mono">
-                  <Tag className="w-3 h-3 text-primary" />
-                  {update.id}
-                </div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
-                  <Calendar className="w-3 h-3" />
-                  {update.date}
-                </div>
-              </div>
+        {!loading && entries.length === 0 && (
+          <div className="text-center py-20 border border-dashed border-border rounded-2xl">
+            <p className="text-muted-foreground text-sm">No changelogs published yet.</p>
+            <p className="text-muted-foreground text-xs mt-2">Generate a changelog and publish it to see it here.</p>
+          </div>
+        )}
 
-              <div className="p-8 rounded-3xl border border-border bg-card/40 backdrop-blur-sm shadow-xl space-y-6 hover:border-primary/30 transition-all">
-                <div className="space-y-4">
-                  <div className="flex flex-wrap gap-2">
-                    {update.categories.map((cat: any) => (
-                      <Badge key={cat.name} className={`${cat.color} text-primary-foreground font-bold uppercase tracking-wider text-[10px] rounded-sm`}>
-                        {cat.name}
-                      </Badge>
-                    ))}
-                  </div>
-                  <h2 className="text-2xl font-headline font-bold leading-tight group-hover:text-primary transition-colors">
-                    {update.title}
-                  </h2>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {update.description}
+        {!loading && entries.length > 0 && (
+          <div className="relative space-y-8">
+            <div className="absolute left-4 top-0 bottom-0 w-[2px] bg-border hidden md:block" />
+            {entries.map((entry) => (
+              <div key={entry.id} className="relative md:pl-16 space-y-4">
+                <div className="absolute left-[13px] top-1 w-3 h-3 rounded-full bg-primary border-4 border-background hidden md:block" />
+                <div className="text-xs text-muted-foreground font-mono">
+                  {new Date(entry.createdAt).toLocaleDateString()} · {entry.repoName}
+                </div>
+                <div className="p-6 rounded-2xl border border-border bg-card/40 space-y-4">
+                  <span className="text-xs font-bold uppercase tracking-wider px-2 py-1 rounded bg-primary/10 text-primary">
+                    {entry.category}
+                  </span>
+                  <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap mt-3">
+                    {entry.content}
                   </p>
-                </div>
-
-                <ul className="space-y-3">
-                  {update.points.map((point: string, i: number) => (
-                    <li key={i} className="flex items-start gap-3 text-sm text-foreground/80">
-                      <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary/40 shrink-0" />
-                      {point}
-                    </li>
-                  ))}
-                </ul>
-
-                <div className="pt-4 flex items-center justify-between border-t border-border/50">
-                  <Button variant="link" className="text-primary p-0 h-auto font-bold text-xs uppercase tracking-widest">
-                    Read Full Notes
-                    <ExternalLink className="ml-2 w-3 h-3" />
-                  </Button>
-                  <div className="text-[10px] text-muted-foreground font-mono">
-                    Updated by {update.author}
+                  <div className="text-xs text-muted-foreground pt-2 border-t border-border/50">
+                    Published by {entry.author}
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         <div className="text-center py-12">
           <p className="text-sm text-muted-foreground">You've reached the beginning of the story.</p>
