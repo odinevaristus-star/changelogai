@@ -232,6 +232,31 @@ export default function GeneratorPage() {
                     <div className="p-4 rounded bg-black/50 text-[13px] font-mono text-white/90 whitespace-pre-wrap leading-relaxed border border-border shadow-inner max-h-[300px] overflow-auto">
                       {finalOutput}
                     </div>
+                    
+                    <Button
+                      className="w-full h-10 rounded bg-primary text-white hover:bg-primary/90 text-[11px] font-bold uppercase tracking-widest"
+                      onClick={async () => {
+                        if (!finalOutput) return
+                        const res = await fetch('/api/timeline/publish', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            content: finalOutput,
+                            category: 'Other',
+                            repoName: localStorage.getItem('github_selected_repo') || 'Unknown repo'
+                          })
+                        })
+                        const data = await res.json()
+                        if (data.success) {
+                          toast({ title: 'Published!', description: 'Your changelog is now on your Timeline.' })
+                        } else {
+                          toast({ title: 'Failed', description: 'Could not publish. Try again.', variant: 'destructive' })
+                        }
+                      }}
+                    >
+                      Publish to Timeline
+                    </Button>
+
                     <Button 
                       variant="outline" 
                       className="w-full h-10 rounded border-border hover:bg-white/5 text-[11px] font-bold uppercase tracking-widest"
