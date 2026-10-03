@@ -70,9 +70,13 @@ export default function TimelinePage() {
                   <span className="text-xs font-bold uppercase tracking-wider px-2 py-1 rounded bg-primary/10 text-primary">
                     {entry.category}
                   </span>
-                  <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap mt-3">
-                    {entry.content}
-                  </p>
+                  <div className="mt-3">
+                    {entry.content.split('\n').map((line: string, i: number) => (
+                      <span key={i} className={line.startsWith('###') ? 'block font-bold text-primary text-sm mb-2' : 'block text-sm text-foreground/80'}>
+                        {line.replace('### ', '')}
+                      </span>
+                    ))}
+                  </div>
                   <div className="text-xs text-muted-foreground pt-2 border-t border-border/50">
                     Published by {entry.author}
                   </div>
