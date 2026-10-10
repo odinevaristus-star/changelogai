@@ -1,4 +1,3 @@
-
 "use client"
 
 import Link from "next/link"
@@ -35,9 +34,7 @@ export function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
       <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="w-7 h-7 bg-white rounded flex items-center justify-center transition-transform group-hover:scale-105">
-            <Zap className="w-4 h-4 text-black fill-current" />
-          </div>
+          <img src="/logo.png" alt="ChangelogAI logo" className="w-7 h-7 object-contain transition-transform group-hover:scale-105" />
           <span className="font-headline font-bold text-lg tracking-tight text-white">
             changelogai
           </span>
@@ -72,7 +69,7 @@ export function Navbar() {
           {session ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="rounded-full overflow-hidden w-8 h-8 border border-white/20 mr-2">
+                <button className="rounded-full overflow-hidden w-8 h-8 border border-white/20 mr-2 outline-none">
                   <Avatar className="w-8 h-8">
                     <AvatarImage src={session.user?.image || ""} alt={session.user?.name || "User"} />
                     <AvatarFallback>{session.user?.name?.[0] || "U"}</AvatarFallback>
@@ -104,7 +101,7 @@ export function Navbar() {
           {session ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="md:hidden rounded-full overflow-hidden w-8 h-8 border border-white/20 mr-2">
+                <button className="md:hidden rounded-full overflow-hidden w-8 h-8 border border-white/20 mr-2 outline-none">
                   <Avatar className="w-8 h-8">
                     <AvatarImage src={session.user?.image || ""} alt={session.user?.name || "User"} />
                     <AvatarFallback>{session.user?.name?.[0] || "U"}</AvatarFallback>
@@ -165,7 +162,7 @@ export function Navbar() {
             {session ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="rounded-full overflow-hidden w-8 h-8 border border-white/20 mr-2">
+                  <button className="rounded-full overflow-hidden w-8 h-8 border border-white/20 mr-2 outline-none">
                     <Avatar className="w-8 h-8">
                       <AvatarImage src={session.user?.image || ""} alt={session.user?.name || "User"} />
                       <AvatarFallback>{session.user?.name?.[0] || "U"}</AvatarFallback>
