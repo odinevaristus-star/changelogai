@@ -34,17 +34,11 @@ export function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
       <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2.5 group">
-          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 transition-transform group-hover:scale-105">
-            <defs>
-              <linearGradient id="cGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#0f1729"/>
-                <stop offset="50%" stopColor="#2d2d8f"/>
-                <stop offset="100%" stopColor="#4444dd"/>
-              </linearGradient>
-            </defs>
-            <path d="M 80 35 A 38 38 0 1 0 80 65 L 62 65 A 20 20 0 1 1 62 35 Z" fill="url(#cGrad)"/>
-            <path d="M50,36 C50,36 52,44 56,48 C60,52 68,50 68,50 C68,50 60,52 56,56 C52,60 50,68 50,68 C50,68 48,60 44,56 C40,52 32,50 32,50 C32,50 40,48 44,44 C48,40 50,36 50,36 Z" fill="#7b8cde"/>
-          </svg>
+          <img
+            src="https://i.ibb.co/Y4MhJDrJ/file-0000000072888243a38bee4fe461efb5.png"
+            alt="ChangelogAI"
+            className="w-7 h-7 object-contain transition-transform group-hover:scale-105"
+          />
           <span className="font-headline font-bold text-lg tracking-tight text-white">
             changelogai
           </span>
