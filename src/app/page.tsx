@@ -84,7 +84,7 @@ export default function LandingPage() {
       <footer className="border-t border-border/50 py-12 px-4 bg-background">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8 text-muted-foreground">
           <div className="flex items-center gap-2">
-            <Zap className="w-4 h-4 text-white" />
+            <img src="https://i.ibb.co/Y4MhJDrJ/file-0000000072888243a38bee4fe461efb5.png" alt="ChangelogAI" className="w-5 h-5 object-contain" />
             <span className="font-headline font-bold text-white">changelogai</span>
           </div>
           
@@ -95,7 +95,7 @@ export default function LandingPage() {
             <Link href="#" className="hover:text-white transition-colors">GitHub</Link>
           </div>
           
-          <p className="text-[10px] uppercase tracking-widest font-mono">© 2024 ChangelogAI V2.1</p>
+          <p className="text-[10px] uppercase tracking-widest font-mono">© 2026 ChangelogAI V2.1</p>
         </div>
       </footer>
     </div>
