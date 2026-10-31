@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -52,7 +53,6 @@ export default function SyncPage() {
     setIsLoading(true);
     try {
       const repos = await fetchGitHubRepos(activeToken);
-      // @ts-ignore - session user interface extension
       const isPro = session?.user?.isPro;
       const filteredRepos = isPro ? repos : repos.filter((repo: any) => !repo.private);
       setSyncedProjects(filteredRepos);
@@ -76,7 +76,6 @@ export default function SyncPage() {
     setIsLoading(true)
     try {
       const repos = await fetchGitHubRepos(token)
-      // @ts-ignore - session user interface extension
       const isPro = session?.user?.isPro;
       const filteredRepos = isPro ? repos : repos.filter((repo: any) => !repo.private);
       setSyncedProjects(filteredRepos)

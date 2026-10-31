@@ -1,3 +1,4 @@
+
 import NextAuth from 'next-auth';
 import GitHub from 'next-auth/providers/github';
 import { Redis } from "@upstash/redis";
@@ -20,10 +21,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.id = token.sub!;
         try {
           const isPro = await redis.get(`user:${session.user.email}:isPro`);
-          // @ts-ignore - session user interface extension
           session.user.isPro = isPro === true || isPro === "true";
         } catch (e) {
-          // @ts-ignore
           session.user.isPro = false;
         }
       }

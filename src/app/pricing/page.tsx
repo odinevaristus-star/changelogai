@@ -93,6 +93,9 @@ export default function PricingPage() {
       },
       customData: {
         user_email: session.user.email
+      },
+      settings: {
+        successUrl: window.location.origin + '/dashboard?status=success'
       }
     });
   };
@@ -135,8 +138,6 @@ export default function PricingPage() {
       return;
     }
 
-    // For Pro, we can now offer a choice or default to Paddle
-    // For this prototype, I'll show a simple prompt or just use Paddle
     const method = confirm("Use Paddle for Global Payments? (Cancel for Paystack/Local)") ? 'paddle' : 'paystack';
     
     if (method === 'paddle') {

@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -106,7 +107,6 @@ export default function GeneratorPage() {
 
   const exportMarkdown = () => {
     if (!finalOutput) return;
-    // @ts-ignore - session user interface extension
     if (!session?.user?.isPro) {
       setShowLimitDialog(true);
       return;
