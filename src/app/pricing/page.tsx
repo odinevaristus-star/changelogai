@@ -1,13 +1,19 @@
 
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Navbar } from "@/components/layout/Navbar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Check, Shield, Zap, Users } from "lucide-react"
 import { useSession } from "next-auth/react"
+
+declare global {
+  interface Window {
+    Paddle: any;
+  }
+}
 
 const tiers = [
   {
@@ -60,17 +66,39 @@ export default function PricingPage() {
   const [loading, setLoading] = useState(false);
   const { data: session } = useSession();
 
-  const handleUpgrade = async (tierName: string) => {
-    if (tierName === "Free") {
-      window.location.href = "/sync";
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.Paddle) {
+      window.Paddle.Setup({
+        token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN,
+        environment: process.env.NEXT_PUBLIC_PADDLE_SANDBOX === 'true' ? 'sandbox' : 'production'
+      });
+    }
+  }, []);
+
+  const handleUpgradePaddle = async () => {
+    if (!session?.user?.email) {
+      alert("Please sign in first.");
       return;
     }
-    if (tierName === "Team") {
-      window.location.href = "mailto:odinevaristus@gmail.com?subject=ChangelogAI Team Plan";
-      return;
-    }
+
+    window.Paddle.Checkout.open({
+      items: [
+        {
+          priceId: process.env.NEXT_PUBLIC_PADDLE_PRO_PRICE_ID,
+          quantity: 1
+        }
+      ],
+      customer: {
+        email: session.user.email
+      },
+      customData: {
+        user_email: session.user.email
+      }
+    });
+  };
+
+  const handleUpgradePaystack = async (tierName: string) => {
     setLoading(true);
-    
     const email = session?.user?.email;
     if (!email) {
       alert("Please sign in first to upgrade.");
@@ -88,12 +116,33 @@ export default function PricingPage() {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert("Payment failed to initialize. Please try again.");
+        alert("Payment failed to initialize.");
         setLoading(false);
       }
     } catch (error) {
-      alert("An error occurred. Please try again.");
+      alert("An error occurred.");
       setLoading(false);
+    }
+  };
+
+  const handleUpgrade = (tierName: string) => {
+    if (tierName === "Free") {
+      window.location.href = "/sync";
+      return;
+    }
+    if (tierName === "Team") {
+      window.location.href = "mailto:odinevaristus@gmail.com?subject=ChangelogAI Team Plan";
+      return;
+    }
+
+    // For Pro, we can now offer a choice or default to Paddle
+    // For this prototype, I'll show a simple prompt or just use Paddle
+    const method = confirm("Use Paddle for Global Payments? (Cancel for Paystack/Local)") ? 'paddle' : 'paystack';
+    
+    if (method === 'paddle') {
+      handleUpgradePaddle();
+    } else {
+      handleUpgradePaystack(tierName);
     }
   };
 
