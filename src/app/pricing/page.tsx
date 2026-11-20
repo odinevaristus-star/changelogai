@@ -18,7 +18,7 @@ declare global {
 const tiers = [
   {
     name: "Free",
-    price: "₦0",
+    price: "$0",
     description: "For individual developers exploring AI synthesis.",
     features: [
       "3 generations per month",
@@ -32,7 +32,7 @@ const tiers = [
   },
   {
     name: "Pro",
-    price: "₦14,000",
+    price: "$9.99",
     description: "For active builders shipping weekly updates.",
     features: [
       "Unlimited generations",
@@ -47,7 +47,7 @@ const tiers = [
   },
   {
     name: "Team",
-    price: "₦29,000",
+    price: "Custom",
     description: "For engineering teams scaling their context.",
     features: [
       "Everything in Pro",
@@ -70,7 +70,7 @@ export default function PricingPage() {
     if (typeof window !== 'undefined' && window.Paddle) {
       const token = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN;
       if (!token) {
-        console.error("Paddle Client Token is missing. Check your environment variables.");
+        console.warn("Paddle Client Token is missing. Please check your environment variables.");
         return;
       }
       
@@ -149,7 +149,8 @@ export default function PricingPage() {
       return;
     }
 
-    const method = confirm("Use Paddle for Global Payments? (Cancel for Paystack/Local)") ? 'paddle' : 'paystack';
+    // Modal alternative: Simple choice for demo purposes
+    const method = confirm("Use Paddle for Global Payments ($9.99)? (Cancel to use Paystack for Local/Naira Payments)") ? 'paddle' : 'paystack';
     
     if (method === 'paddle') {
       handleUpgradePaddle();
@@ -186,7 +187,7 @@ export default function PricingPage() {
                 <CardTitle className="text-xl font-bold text-white">{tier.name}</CardTitle>
                 <div className="flex items-baseline gap-1">
                   <span className="text-4xl font-bold text-white">{tier.price}</span>
-                  <span className="text-muted-foreground text-sm">/month</span>
+                  <span className="text-muted-foreground text-sm">{tier.name === "Team" ? "" : "/month"}</span>
                 </div>
                 <CardDescription className="text-sm leading-relaxed">
                   {tier.description}
