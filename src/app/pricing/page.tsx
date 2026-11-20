@@ -69,14 +69,16 @@ export default function PricingPage() {
   useEffect(() => {
     if (typeof window !== 'undefined' && window.Paddle) {
       const token = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN;
+      const isSandbox = process.env.NEXT_PUBLIC_PADDLE_SANDBOX === 'true';
+      
       if (!token) {
-        console.warn("Paddle Client Token is missing. Please check your environment variables.");
+        console.error("[PADDLE] Client Token is missing. Ensure NEXT_PUBLIC_PADDLE_CLIENT_TOKEN is set in Vercel.");
         return;
       }
       
       window.Paddle.Initialize({
         token: token,
-        environment: process.env.NEXT_PUBLIC_PADDLE_SANDBOX === 'true' ? 'sandbox' : 'production'
+        environment: isSandbox ? 'sandbox' : 'production'
       });
     }
   }, []);
@@ -87,15 +89,22 @@ export default function PricingPage() {
       return;
     }
 
-    if (!window.Paddle) {
-      alert("Billing service is still loading. Please try again in a moment.");
+    if (!window.Paddle || !window.Paddle.Checkout) {
+      alert("Billing service is still loading or failed to initialize. Please check console for errors.");
+      return;
+    }
+
+    const priceId = process.env.NEXT_PUBLIC_PADDLE_PRO_PRICE_ID;
+    if (!priceId) {
+      alert("Configuration error: Price ID is missing. Please contact support.");
+      console.error("[PADDLE] NEXT_PUBLIC_PADDLE_PRO_PRICE_ID is missing.");
       return;
     }
 
     window.Paddle.Checkout.open({
       items: [
         {
-          priceId: process.env.NEXT_PUBLIC_PADDLE_PRO_PRICE_ID,
+          priceId: priceId,
           quantity: 1
         }
       ],
@@ -130,11 +139,11 @@ export default function PricingPage() {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert("Payment failed to initialize.");
+        alert("Payment failed to initialize: " + (data.error || "Unknown error"));
         setLoading(false);
       }
     } catch (error) {
-      alert("An error occurred.");
+      alert("An error occurred during Paystack initialization.");
       setLoading(false);
     }
   };
@@ -145,14 +154,14 @@ export default function PricingPage() {
       return;
     }
     if (tierName === "Team") {
-      window.location.href = "mailto:odinevaristus@gmail.com?subject=ChangelogAI Team Plan";
+      window.location.href = "mailto:odinevaristus@gmail.com?subject=ChangelogAI Team Plan Request";
       return;
     }
 
-    // Modal alternative: Simple choice for demo purposes
-    const method = confirm("Use Paddle for Global Payments ($9.99)? (Cancel to use Paystack for Local/Naira Payments)") ? 'paddle' : 'paystack';
+    // Modal alternative: Choice for global vs local
+    const usePaddle = confirm("Use Paddle for Global USD Payments ($9.99)?\n\n(Click Cancel for local Paystack/Naira payment)");
     
-    if (method === 'paddle') {
+    if (usePaddle) {
       handleUpgradePaddle();
     } else {
       handleUpgradePaystack(tierName);
