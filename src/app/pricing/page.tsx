@@ -75,10 +75,14 @@ export default function PricingPage() {
         console.error("[PADDLE] Client Token is missing. Ensure NEXT_PUBLIC_PADDLE_CLIENT_TOKEN is set in Vercel.");
         return;
       }
+
+      // In Paddle v2, Environment must be set before Initialize
+      if (isSandbox) {
+        window.Paddle.Environment.set('sandbox');
+      }
       
       window.Paddle.Initialize({
-        token: token,
-        environment: isSandbox ? 'sandbox' : 'production'
+        token: token
       });
     }
   }, []);
