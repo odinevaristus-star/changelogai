@@ -68,8 +68,14 @@ export default function PricingPage() {
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.Paddle) {
-      window.Paddle.Setup({
-        token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN,
+      const token = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN;
+      if (!token) {
+        console.error("Paddle Client Token is missing. Check your environment variables.");
+        return;
+      }
+      
+      window.Paddle.Initialize({
+        token: token,
         environment: process.env.NEXT_PUBLIC_PADDLE_SANDBOX === 'true' ? 'sandbox' : 'production'
       });
     }
@@ -78,6 +84,11 @@ export default function PricingPage() {
   const handleUpgradePaddle = async () => {
     if (!session?.user?.email) {
       alert("Please sign in first.");
+      return;
+    }
+
+    if (!window.Paddle) {
+      alert("Billing service is still loading. Please try again in a moment.");
       return;
     }
 
